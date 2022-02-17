@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using Reflexion.Properties;
 
 namespace Reflexion
 {
@@ -20,6 +21,8 @@ namespace Reflexion
         bool moveUp;
         bool moveDown;
         int movingSpeed = 10;
+        Bitmap obst;
+        int anzahlObstKonsumiert = 0;
 
         public Form1()
         {
@@ -31,9 +34,11 @@ namespace Reflexion
 
             InitialisiereRechteck();
 
-            while (alleZiele.Count <= 3)
+            obst = Resources.Obst;
+
+            while (alleZiele.Count < 3)
             {
-                spawnTargets();
+                spawnTarget();
             }
 
             timerGame.Interval = 10;
@@ -62,20 +67,18 @@ namespace Reflexion
 
             for (int i = 0; i < alleZiele.Count; i++)
             {
-                graphics.FillRectangle(new SolidBrush(Color.Red), alleZiele[i]);
+                graphics.DrawImage(obst, alleZiele[i]);
             }
-                
+
+            graphics.DrawString("Obst Konsumiert: " + anzahlObstKonsumiert, new Font("Arial", 12), new SolidBrush(Color.Black), 0,0);
         }
 
-        int spawnRate = 100;
-        int spawnZaehler = 0;
-        private void spawnTargets()
+        private void spawnTarget()
         {
-            if (spawnZaehler >= spawnRate)
-            {
                 Rectangle rectangle = new Rectangle();
                 do
                 {
+                //TODO Nicht Clientsize komplett verwenden sondern -
                     rectangle.X = random.Next(0, ClientSize.Width);
                     rectangle.Y = random.Next(0, ClientSize.Height);
                 } while (rectangle.IntersectsWith(spieler));
@@ -84,12 +87,6 @@ namespace Reflexion
                 rectangle.Height = ZieleBreite;
 
                 alleZiele.Add(rectangle);
-                spawnZaehler = 0;
-            }
-            else
-            {
-                spawnZaehler++;
-            }
         }
         private void FrmReflexion_KeyDown(object sender, KeyEventArgs e)
         {
@@ -115,24 +112,39 @@ namespace Reflexion
             if (moveDown)
             {
                 spieler.Y += movingSpeed;
+                if (spieler.Y + spieler.Height > ClientSize.Height)
+                {
+                    spieler.Y = ClientSize.Height - spieler.Height;
+                }
             }
             if (moveUp)
             {
                 spieler.Y -= movingSpeed;
+                if (spieler.Y < 0)
+                {
+                    spieler.Y = 0;
+                }
             }
             if (moveRight)
             {
                 spieler.X += movingSpeed;
+                if (spieler.X + spieler.Width > ClientSize.Width)
+                {
+                    spieler.X = ClientSize.Width - spieler.Width;
+                }
             }
             if (moveLeft)
             {
                 spieler.X -= movingSpeed;
+                if (spieler.X < 0)
+                {
+                    spieler.X = 0;
+                }
             }
         }
 
         private void timerGame_Tick(object sender, EventArgs e)
         {
-            spawnTargets();
             playerMovement();
             kollisionMitSpieler();
             Refresh();
@@ -145,6 +157,8 @@ namespace Reflexion
                 if (spieler.IntersectsWith(rectangle))
                 {
                     alleZiele.Remove(rectangle);
+                    spawnTarget();
+                    anzahlObstKonsumiert++;
                 }
             }
         }
