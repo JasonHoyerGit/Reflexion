@@ -63,6 +63,16 @@ namespace Reflexion.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Bomb {
+            get {
+                object obj = ResourceManager.GetObject("Bomb", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Obst {
             get {
                 object obj = ResourceManager.GetObject("Obst", resourceCulture);

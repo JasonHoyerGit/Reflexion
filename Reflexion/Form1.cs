@@ -15,7 +15,7 @@ namespace Reflexion
         Rectangle spieler;
         int anteilRechteckDimension = 10;
         List<Rectangle> alleZiele = new List<Rectangle>();
-        List<Rectangle> alleFeinde = new List<Rectangle>();
+        List<Enemy> alleFeinde = new List<Enemy>();
         Random random = new Random();
         bool moveLeft;
         bool moveRight;
@@ -23,6 +23,7 @@ namespace Reflexion
         bool moveDown;
         int movingSpeed = 10;
         Bitmap obst;
+        Bitmap bomb;
         int anzahlObstKonsumiert = 0;
 
         public Form1()
@@ -33,9 +34,10 @@ namespace Reflexion
 
             ZieleBreite = ClientSize.Width / 15;
 
-            InitialisiereRechteck();
+            InitialisiereSpieler();
 
             obst = Resources.Obst;
+            bomb = Resources.Bomb;
 
             while (alleZiele.Count < 3)
             {
@@ -47,7 +49,7 @@ namespace Reflexion
         }
 
 
-        private void InitialisiereRechteck()
+        private void InitialisiereSpieler()
         {
             spieler = new Rectangle();
             spieler.Width = ClientSize.Width / anteilRechteckDimension;
@@ -70,6 +72,11 @@ namespace Reflexion
             {
                 graphics.DrawImage(obst, alleZiele[i]);
             }
+            foreach (Enemy item in alleFeinde)
+            {
+                graphics.DrawImage(bomb, item.RecEnemy);
+            }
+
 
             graphics.DrawString("Obst Konsumiert: " + anzahlObstKonsumiert, new Font("Arial", 12), new SolidBrush(Color.Black), 0,0);
         }
@@ -94,14 +101,20 @@ namespace Reflexion
             rectangle.Height = ZieleBreite;
             return rectangle;
         }
-        int spawnRate = 14;
+        int spawnRate = 50;
         int spawnZaehler = 0;
         private void spawnEnemies()
         {
             if (spawnZaehler >= spawnRate)
             {
-                alleFeinde.Add(zufaelligesRechteck());
+                alleFeinde.Add(new Enemy(3, zufaelligesRechteck(), ClientSize));
+                spawnZaehler = 0;
             }
+            else
+            {
+                spawnZaehler++;
+            }
+
         }
         private void FrmReflexion_KeyDown(object sender, KeyEventArgs e)
         {
@@ -162,7 +175,17 @@ namespace Reflexion
         {
             playerMovement();
             kollisionMitSpieler();
+            spawnEnemies();
+            moveEnemies();
             Refresh();
+        }
+
+        private void moveEnemies()
+        {
+            foreach (Enemy enemy in alleFeinde)
+            {
+                enemy.Move();
+            }
         }
 
         private void kollisionMitSpieler()
@@ -174,6 +197,13 @@ namespace Reflexion
                     alleZiele.Remove(rectangle);
                     spawnTarget();
                     anzahlObstKonsumiert++;
+                }
+            }
+            foreach (Enemy feind in alleFeinde)
+            {
+                if (spieler.IntersectsWith(feind.RecEnemy))
+                {
+                    timerGame.Stop();
                 }
             }
         }
