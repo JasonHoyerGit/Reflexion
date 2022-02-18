@@ -15,6 +15,7 @@ namespace Reflexion
         Rectangle spieler;
         int anteilRechteckDimension = 10;
         List<Rectangle> alleZiele = new List<Rectangle>();
+        List<Rectangle> alleFeinde = new List<Rectangle>();
         Random random = new Random();
         bool moveLeft;
         bool moveRight;
@@ -75,18 +76,32 @@ namespace Reflexion
 
         private void spawnTarget()
         {
-                Rectangle rectangle = new Rectangle();
-                do
-                {
-                //TODO Nicht Clientsize komplett verwenden sondern -
-                    rectangle.X = random.Next(0, ClientSize.Width);
-                    rectangle.Y = random.Next(0, ClientSize.Height);
-                } while (rectangle.IntersectsWith(spieler));
+            Rectangle rectangle = zufaelligesRechteck();
 
-                rectangle.Width = ZieleBreite;
-                rectangle.Height = ZieleBreite;
+            alleZiele.Add(rectangle);
+        }
 
-                alleZiele.Add(rectangle);
+        private Rectangle zufaelligesRechteck()
+        {
+            Rectangle rectangle = new Rectangle();
+            do
+            {
+                rectangle.X = random.Next(0, ClientSize.Width - ZieleBreite);
+                rectangle.Y = random.Next(0, ClientSize.Height - ZieleBreite);
+            } while (rectangle.IntersectsWith(spieler));
+
+            rectangle.Width = ZieleBreite;
+            rectangle.Height = ZieleBreite;
+            return rectangle;
+        }
+        int spawnRate = 14;
+        int spawnZaehler = 0;
+        private void spawnEnemies()
+        {
+            if (spawnZaehler >= spawnRate)
+            {
+                alleFeinde.Add(zufaelligesRechteck());
+            }
         }
         private void FrmReflexion_KeyDown(object sender, KeyEventArgs e)
         {
